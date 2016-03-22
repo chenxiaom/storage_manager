@@ -1,0 +1,139 @@
+<span class="label label-primary pull-right">
+<span class="label label-warning pull-right">
+<span class="label label-success pull-right">
+<span class="label label-info pull-right">
+
+
+mysql -uroot -proot1234 storage_manager_db
+update storage_manager_users set password=md5('admin');
+
+class StorageInfos
+	stor_sn	
+	stor_model 	
+	stor_name 	
+	stor_use	
+	stor_bare_capacity	
+	stor_space_capacity 	
+	stor_ldevs_count 	
+	stor_remain_ldevs 	
+	stor_remain_capacity 	
+	stor_usage_rate	
+	stor_cm_disk_host	
+	is_active 	
+	is_delete	
+	comment 	
+	modify_number 
+	last_update	
+	date_joined	
+
+
+
+
+class StorHosts
+	stor_sn
+	host_map
+	host_ldev_count
+	host_ldev_size
+	host_allocated_size
+	host_active
+	comment
+	last_update
+	date_joined
+
+Html
+	j_stor_sn
+	j_host_map
+	j_host_ldev_count
+	j_host_ldev_size
+	j_host_allocated_size
+	j_host_active
+	j_stor_comment
+	
+	
+class Logs(models.Model):
+    user = models.CharField(max_length=20, null=True)
+    stor_sn = models.CharField(max_length=50, default='NONE')
+    event_type = models.CharField(max_length=6, null=True)
+    event_title = models.CharField(max_length=15, null=True)
+    event_msg = models.CharField(max_length=120, null=True)
+    start_time = models.CharField(max_length=120, null=True)
+    new_ldevs=models.IntegerField(null=True)
+    last_ldevs=models.IntegerField(null=True)
+    new_space=models.IntegerField(null=True)
+    last_space=models.IntegerField(null=True)
+    new_idle=models.DecimalField(max_digits=4,decimal_places=3, null=True)
+    last_idle=models.DecimalField(max_digits=4,decimal_places=3, null=True)
+    event_inst=models.IntegerField(default=0)   #Log操作类型，0是info，1是insert，2是modify，3是delete
+	
+	
+	
+	
+	
+# coding:utf-8
+from stor_info.models import *
+stor_info=StorageInfos.objects.filter(id=3)
+stor_info=stor_info[0]
+stor_info = [stor_info.stor_name,stor_info.stor_space_capacity , stor_info.stor_ldevs_count,stor_info.stor_remain_capacity,stor_info.stor_remain_ldevs,stor_info.stor_idle_rage]
+
+host_info = [u'3', u'"kfdadt01 kfdadt02"', u'8', u'129', u'1032', u'on', u'\u5df2\u6838\u5b9e']
+
+stor_sn , host_map, host_ldev_count, host_ldev_size, host_allocated_size, host_active, comment = host_info
+stor_name,stor_space_capacity , stor_ldevs_count,stor_remain_capacity,stor_remain_ldevs,stor_idle_rage = stor_info
+new_remain_ldevs = int(stor_remain_ldevs) - int(host_ldev_count)
+new_remain_space = int(stor_remain_capacity) - int(host_allocated_size)
+new_idle_rage=(int(stor_remain_capacity)/int(stor_space_capacity))*100 
+
+
+import datetime
+
+a = StorHosts(stor_sn_id=int(stor_sn), host_map=host_map,
+              host_ldev_count=int(host_ldev_count), host_ldev_size=int(host_ldev_size),
+              host_allocated_size=int(host_allocated_size),
+              host_active=host_active, comment=comment,
+              last_update=datetime.datetime.now(),
+              date_joined=datetime.datetime.now())
+			  
+if a.save():
+    new_stor_info=[stor_sn,new_remain_ldevs,new_remain_space,new_idle_rage]
+    update_stor_cap(new_stor_info)
+    user = 'admin'  #request.session.get('user_id')
+    msg_title=u'更新存储信息成功'
+    msg = u'Host: %s 主机添加后，%s 存储(序列号:%s)容量更新成功!' % (host_map,stor_name,stor_sn)
+    db_change_record(user=user, event_type='ASH',event_title=msg_title,event_msg=msg,start_time=datetime.datetime.now(),stor_sn=stor_sn,
+                    new_ldevs=new_remain_ldevs, last_ldevs=int(stor_remain_ldevs) ,
+                    new_space=new_remain_space, last_space=int(stor_remain_capacity) ,
+                    new_idle=new_idle_rage, last_idle=stor_idle_rage ,
+                    event_inst=2)
+					
+
+	/stor_info/manu_list/				
+					
+=================
+测试：
+keyword = request.GET.get('keyword', '')
+    if keyword:
+        posts = IDCS.objects.filter(Q(name__contains=keyword) | Q(comment__contains=keyword))
+    else:
+        posts = IDCS.objects.exclude(name='ALL').order_by('id')
+		
+		j_stor_bare_cap
+		j_stor_space_cap
+		
+		form.submit();
+		
+$("input#j_stor_space_cap").on("change",function(){
+    var j_stor_bare_cap = $("#j_stor_bare_cap");// 获得ID为first标签的jQuery对象
+    var j_stor_space_cap = $("#j_stor_space_cap");// 获得ID为first标签的jQuery对象
+    var num1 = j_stor_bare_cap.val();// 取得first对象的值
+    var num2 = j_stor_space_cap.val();// 取得second对象的值
+    if(num1<num2){
+		alert("ERROR");
+	}
+	else{
+		alert("OK");
+	} 
+});		
+	
+	
+	
+	
